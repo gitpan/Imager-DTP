@@ -36,4 +36,13 @@ my %modules = (
 while(my($nm,$opt) = each %modules){
 	ok($nm->new(), "$nm"."->new() without options");
 	ok($nm->new(%{$opt}), "$nm"."->new() with options");
+	my $obj = $nm->new(%{$opt});
+	my $img = Imager->new(xsize=>50,ysize=>50);
+	if($nm =~ /^Imager::DTP::Textbox/){
+		ok($obj->draw(target=>$img,x=>10,y=>10), "$nm"."->draw()");
+	}elsif($nm =~ /^Imager::DTP::Line/){
+		ok($obj->draw(target=>$img,x=>10,y=>10), "$nm"."->draw()");
+	}elsif($nm =~ /^Imager::DTP::Letter/){
+		ok($obj->draw(target=>$img,x=>10,y=>10), "$nm"."->draw()");
+	}
 }

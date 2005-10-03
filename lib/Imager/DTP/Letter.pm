@@ -2,8 +2,9 @@ package Imager::DTP::Letter;
 use strict;
 use Carp;
 use Imager;
+use vars qw($VERSION);
 
-our $VERSION = '0.01';
+$VERSION = '0.02';
 
 sub new {
 	my $self = shift;
@@ -179,7 +180,9 @@ Imager::DTP::Letter - letter handling module for Imager::DTP package
 
 Imager::DTP::Letter is a module intended for handling each letter/character in a whole text string (sentence or paragraph).  Each Imager::DTP::Letter instance will hold one letter/character internally, and it holds various information about the letter/character, most of it aquired from Imager::Font->bounding_box() method.  Thus, Imager::DTP::Letter is intended to act as a single letter with font information (such as ascent/descent) bundled together.  It is allowed to set more than one letter/character to a single Imager::DTP::Letter instance, but still, the whole Imager::DTP package will handle the instance as 'single letter'.
 
-=head2 METHODS
+=head1 METHODS
+
+=head2 BASIC METHODS
 
 =head3 new
 
@@ -288,7 +291,7 @@ Returns the advanced width (in pixels) of the instance.
 
 =over
 
-=item * hiratai/choutai
+=item * transformation (like width*80%, height*120%)
 
 =item * change Carp-only error handling to something more elegant.
 
@@ -296,10 +299,14 @@ Returns the advanced width (in pixels) of the instance.
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi <iandeth99@ybb.ne.jp>
+Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2005 Toshimasa Ishibashi, all rights reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =head1 SEE ALSO
 

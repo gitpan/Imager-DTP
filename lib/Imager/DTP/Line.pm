@@ -3,8 +3,9 @@ use strict;
 use Carp;
 use utf8;
 use Imager::DTP::Letter;
+use vars qw($VERSION);
 
-our $VERSION = '0.01';
+$VERSION = '0.02';
 
 sub new {
 	my $self = shift;
@@ -134,6 +135,10 @@ Imager::DTP::Line - line handling module for Imager::DTP package.
    my $target = Imager->new(xsize=>250,ysize=>50);
    $line->draw(target=>$target,x=>10,y=>10);
 
+=head1 DESCRIPTION
+
+Imager::DTP::Line is a module intended for handling chunk of letters lined-up in a single vector, out of the whole text string (sentence or paragraph).  Here, the word "Line" is meant to be "a single row", "a single row in a text-wrapped textbox", and not "1-pixel thick line" as in graphical meaning.  The text string provided (by setText() method) will be parsed into letters, and each letter will be turned into Imager::DTP::Letter instance internally.  Thus, Imager::DTP::Line could be understood as "a content holder for Imager::DTP::Letter instances", or "a box to put Letters in order". Each letter could hold their own font-preferences (like face/size/color), and this could be done by adding text (using setText() method) with different font-preferences one-by-one.  Then, you'll only need to call draw() method once to draw all those letters.
+
 =head1 CLASS RELATION
 
 Imager::DTP::Line is an ABSTRACT CLASS. The extended class would be Imager::DTP::Line::Horizontal and Imager::DTP::Line::Vertical.  So you must "use" the extended class (either of Horizonal or Vertical), and not the Imager::DTP::Line itself.  The difference between Horizontal and Vertical is as follows:
@@ -150,11 +155,9 @@ letters are drawn from top to bottom.
 
 =back
 
-=head1 DESCRIPTION
+=head1 METHODS
 
-Imager::DTP::Line is a module intended for handling chunk of letters lined-up in a single vector, out of the whole text string (sentence or paragraph).  Here, the word "Line" is meant to be "a single row", "a single row in a text-wrapped textbox", and not "1-pixel thick line" as in graphical meaning.  The text string provided (by setText() method) will be parsed into letters, and each letter will be turned into Imager::DTP::Letter instance internally.  Thus, Imager::DTP::Line could be understood as "a content holder for Imager::DTP::Letter instances", or "a box to put Letters in order". Each letter could hold their own font-preferences (like face/size/color), and this could be done by adding text (using setText() method) with different font-preferences one-by-one.  Then, you'll only need to call draw() method once to draw all those letters.
-
-=head2 METHODS
+=head2 BASIC METHODS
 
 =head3 new
 
@@ -272,10 +275,14 @@ I can't figure out a way to call vertical-fonts inplemented inside multi-byte fo
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi <iandeth99@ybb.ne.jp>
+Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2005 Toshimasa Ishibashi, all rights reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =head1 SEE ALSO
 

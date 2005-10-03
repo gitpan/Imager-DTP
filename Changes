@@ -2,3 +2,8 @@ Revision history for Perl extension Imager::DTP.
 
 0.01 Wed Sep 28 16:46:00 2005
 	- original version
+
+0.02 Tue Oct 04 15:54:00 2005
+	- Imager + FreeType2 pre-req check added to Makefile.PL
+	- changes in pod documentation and README
+	- changes in t/*.t script

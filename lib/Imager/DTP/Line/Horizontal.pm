@@ -1,8 +1,9 @@
 package Imager::DTP::Line::Horizontal;
 use base Imager::DTP::Line;
 use strict;
+use vars qw($VERSION);
 
-our $VERSION = '0.01';
+$VERSION = '0.02';
 
 sub draw {
 	my $self = shift;
@@ -76,10 +77,14 @@ See L<Imager::DTP::Line> for synopsis and description.
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi <iandeth99@ybb.ne.jp>
+Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2005 Toshimasa Ishibashi, all rights reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =head1 SEE ALSO
 

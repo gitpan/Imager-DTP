@@ -2,8 +2,9 @@ package Imager::DTP::Textbox;
 use strict;
 use Carp;
 use Imager;
+use vars qw($VERSION);
 
-our $VERSION = '0.01';
+$VERSION = '0.02';
 
 sub new {
 	my $self = shift;
@@ -432,6 +433,10 @@ Imager::DTP::Textbox - multi-byte text handling module with text wrapping and li
    my $target = Imager->new(xsize=>250,ysize=>250);
    $tb->draw(target=>$target,x=>10,y=>10);
 
+=head1 DESCRIPTION
+
+Imager::DTP::Textbox is a module intended for handling sentences and paragraphs consisted with multi-byte characters, such as Japanese and Chinese.  It supports text wrapping and line alignment, and is able to draw text string vertically from top to bottom as well.  All the text string provided (by setText() method) will be splitted by "\n", and each chunk will be turned into Imager::DTP::Line instance internally.  So in another words, Imager::DTP::Textbox can be described as "a big box to put lines and letters in order". It's like WWW Browser's textarea input, or Adobe Illustrator's textbox tool.
+
 =head1 CLASS RELATION
 
 Imager::DTP::Textbox is an ABSTRACT CLASS. The extended class would be Imager::DTP::Textbox::Horizontal and Imager::DTP::Textbox::Vertical.  (Yes, I know the package name is much longer than it should be... I took the advantage of comprehension).  So you must "use" the extended class (either of Horizonal or Vertical), and not the Imager::DTP::Textbox itself.  The difference between Horizontal and Vertical is as follows:
@@ -448,11 +453,9 @@ letters are drawn from top to bottom, line stacks from right to left.
 
 =back
 
-=head1 DESCRIPTION
+=head1 METHODS
 
-Imager::DTP::Textbox is a module intended for handling sentences and paragraphs consisted with multi-byte characters, such as Japanese and Chinese.  It supports text wrapping and line alignment, and is able to draw text string vertically from top to bottom as well.  All the text string provided (by setText() method) will be splitted by "\n", and each chunk will be turned into Imager::DTP::Line instance internally.  So in another words, Imager::DTP::Textbox can be described as "a big box to put lines and letters in order". It's like WWW Browser's textarea input, or Adobe Illustrator's textbox tool.
-
-=head2 METHODS
+=head2 BASIC METHODS
 
 =head3 new
 
@@ -640,10 +643,14 @@ Returns the current value of vertical text wrap bounding.
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi <iandeth99@ybb.ne.jp>
+Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
 
-This library is free software; you can redistribute it and/or modify
-it under the same terms as Perl itself.
+=head1 COPYRIGHT & LICENSE
+
+Copyright 2005 Toshimasa Ishibashi, all rights reserved.
+
+This library is free software; you can redistribute it and/or modify it
+under the same terms as Perl itself.
 
 =head1 SEE ALSO
 
