@@ -4,7 +4,7 @@ use Carp;
 use Imager;
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub new {
 	my $self = shift;
@@ -29,6 +29,9 @@ sub new {
 	if(defined($o{text})){
 		$self->setText(text=>$o{text},font=>$o{font});
 		$self->setWspace(pixel=>$o{wspace});
+	}
+	if($o{xscale} || $o{yscale}){
+		$self->setLetterScale(x=>$o{xscale},y=>$o{yscale});
 	}
 	return $self;
 }
@@ -352,6 +355,15 @@ sub setWspace {
 	return 1;
 }
 
+sub setLetterScale {
+	my $self = shift;
+	my %o = @_;
+	foreach my $line (@{$self->getLines()}){
+		$line->setLetterScale(@_);
+	}
+	return 1;
+}
+
 sub getWidth {
 	my $self = shift;
 	$self->_calcWidthHeight();
@@ -408,6 +420,25 @@ Imager::DTP::Textbox - multi-byte text handling module with text wrapping and li
    # first, define font & text string
    my $font  = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
                size=>14);
+   my $text  = 'The Greater Of Two Evils';
+   
+   # create instance
+   my $tb = Imager::DTP::Textbox::Horizontal->new(text=>$text,
+            font=>$font);
+   
+   # and draw the text string on target image
+   my $target = Imager->new(xsize=>250,ysize=>250);
+   $tb->draw(target=>$target,x=>10,y=>10);
+
+=head1 DESCRIPTION
+
+Imager::DTP::Textbox is a module intended for handling sentences and paragraphs consisted with multi-byte characters, such as Japanese and Chinese.  It supports text wrapping and line alignment, and is able to draw text string vertically from top to bottom as well.  All the text string provided (by setText() method) will be splitted by "\n", and each chunk will be turned into Imager::DTP::Line instance internally.  So in another words, Imager::DTP::Textbox can be described as "a big box to put lines and letters in order". It's like WWW Browser's textarea input, or Adobe Illustrator's textbox tool.
+
+   use Imager::DTP::Textbox::Horizontal;  # or Vertical
+   
+   # define font & text string
+   my $font  = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
+               size=>14);
    my $text  = 'This year\'s Thrash Domination Tour here in ';
       $text .= 'Japan was great.';
       $text .= "\n\n";
@@ -423,19 +454,17 @@ Imager::DTP::Textbox - multi-byte text handling module with text wrapping and li
    $tb->setLeading(percent=>180); # set space between lines
    $tb->setAlign(halign=>'left',valign=>'top'); # set text alignment
    $tb->setWrap(width=>200,height=>150); # set text wrapping
+   $tb->setLetterScale(x=>1.2,y=>0.5); # set letter transform scale
    
    # create instance - or the shorcut way
    my $tb = Imager::DTP::Textbox::Horizontal->new(text=>$text,
             font=>$font, wspace=>5, leading=>180, halign=>'left',
-            valign=>'top', wrapWidth=>200, wrapHeight=>180);
+            valign=>'top', wrapWidth=>200, wrapHeight=>180, 
+            xscale=>1.2, yscale=>0.5);
    
-   # and draw the text string on target image
+   # draw the text string on target image
    my $target = Imager->new(xsize=>250,ysize=>250);
    $tb->draw(target=>$target,x=>10,y=>10);
-
-=head1 DESCRIPTION
-
-Imager::DTP::Textbox is a module intended for handling sentences and paragraphs consisted with multi-byte characters, such as Japanese and Chinese.  It supports text wrapping and line alignment, and is able to draw text string vertically from top to bottom as well.  All the text string provided (by setText() method) will be splitted by "\n", and each chunk will be turned into Imager::DTP::Line instance internally.  So in another words, Imager::DTP::Textbox can be described as "a big box to put lines and letters in order". It's like WWW Browser's textarea input, or Adobe Illustrator's textbox tool.
 
 =head1 CLASS RELATION
 
@@ -471,7 +500,8 @@ Can be called with or without options.
       $text .= "And my misfits way of life.";
    my $tb = Imager::DTP::Textbox::Horizontal->new(text=>$text,
             font=>$font, wspace=>5, leading=>150, halign=>'left',
-            valign=>'top', wrapWidth=>200, wrapHeight=>180);
+            valign=>'top', wrapWidth=>200, wrapHeight=>180,
+            xscale=>1.2, yscale=>0.5);
 
 =head3 setText
 
@@ -566,6 +596,16 @@ Set the maximum width and height of the bounding box, for the lines and letters 
    $tb->setWrap(width=>100,height=>100);
 
 Wrapping logic is letter-based, meaning text may be wrapped right in the middle of a "word", which is a normal wrapping rule for multi-byte texts (at least for Japanese, yes) in DTP applications.  But with single-byte character word, this logic will make the sentence look ugly, so I've added some logic for single-byte character words to "always wrap at the beginning of the word".  With it, alphabetical sentences and paragraphs will look OK, although hyphenation is not implemented (yet).
+
+=head3 setLetterScale
+
+Setting x/y scale will make each letter transform to the specified ratio.  See <Imager::DTP::Letter>->setScale() method for further description.
+
+   # make width of each letter to 80%
+   $tb->setLetterScale(x=>0.8);
+   
+   # make width 120% and height 60%
+   $tb->setLetterScale(x=>1.2,y=>0.6);
 
 =head3 draw
 

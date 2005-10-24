@@ -34,7 +34,10 @@ You will need
     FreeType2
     Imager module compiled with FreeType2 option enabled
 
-in order to use Imager::DTP.  Imager module is available at CPAN, and FreeType2 at <http://freetype.sourceforge.net>.  Install FreeType2 first, then check to see if Imager's FreeType2 option is enabled by running Imager's Makefile.PL.
+in order to use Imager::DTP.  Imager module is available at CPAN, and 
+FreeType2 at <http://freetype.sourceforge.net>.  Install FreeType2 first, 
+then check to see if Imager's FreeType2 option is enabled by running 
+Imager's Makefile.PL.
 
 INSTALLATION
 

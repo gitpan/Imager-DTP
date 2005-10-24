@@ -1,5 +1,5 @@
 # distribution version
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 =pod
 
@@ -30,7 +30,9 @@ Imager::DTP - draw text with DTP app-like custom options
                halign=>'left',  # set horizontal alignment
                valign=>'top',   # set vertical alignment
                wrapWidth=>200,  # set text wrap width
-               wrapHeight=>180  # set text wrap height
+               wrapHeight=>180, # set text wrap height
+               xscale=>1.5,     # set letter transformation x scale
+               yscale=>0.5,     # set letter transformation y scale
             );
    
    # draw the text string on target image

@@ -25,6 +25,7 @@ WriteMakefile(
     PL_FILES            => {},
     PREREQ_PM => {
 		'Imager' => 0.39,
+		'Imager::Matrix2d' => 0,
 		'Test::More' => 0,
 		'utf8' => 0,
     },

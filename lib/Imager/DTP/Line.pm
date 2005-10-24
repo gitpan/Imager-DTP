@@ -5,7 +5,7 @@ use utf8;
 use Imager::DTP::Letter;
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub new {
 	my $self = shift;
@@ -26,6 +26,9 @@ sub new {
 	$self->setWspace(pixel=>$o{wspace}) if($o{wspace});
 	if($o{text}){
 		$self->setText(text=>$o{text},font=>$o{font});
+	}
+	if($o{xscale} || $o{yscale}){
+		$self->setLetterScale(x=>$o{xscale},y=>$o{yscale});
 	}
 	return $self;
 }
@@ -61,7 +64,6 @@ sub _setText_parse {
 	confess "_setText_parse - this is an abstract method";
 }
 
-
 sub setWspace {
 	my $self = shift;
 	my %o = @_;
@@ -70,6 +72,15 @@ sub setWspace {
 	}
 	$self->{wspace} = ($o{pixel})? $o{pixel} : 0;
 	$self->{isUpdated} = 0;
+	return 1;
+}
+
+sub setLetterScale {
+	my $self = shift;
+	my %o = @_;
+	foreach my $ltr (@{$self->getLetters()}){
+		$ltr->setScale(@_);
+	}
 	return 1;
 }
 
@@ -122,14 +133,9 @@ Imager::DTP::Line - line handling module for Imager::DTP package.
               size=>16);
    my $text = 'master of puppets';
    
-   # create instance - basic way
-   my $line = Imager::DTP::Line::Horizontal->new();
-   $line->setText(text=>$text,font=>$font); # set text with font
-   $line->setWspace(pixel=>5); # set space between letters
-   
-   # create instance - or the shorcut way
+   # create instance
    my $line = Imager::DTP::Line::Horizontal->new(text=>$text,
-              font=>$font,wspace=>5);
+              font=>$font);
    
    # and draw the text string on target image
    my $target = Imager->new(xsize=>250,ysize=>50);
@@ -138,6 +144,27 @@ Imager::DTP::Line - line handling module for Imager::DTP package.
 =head1 DESCRIPTION
 
 Imager::DTP::Line is a module intended for handling chunk of letters lined-up in a single vector, out of the whole text string (sentence or paragraph).  Here, the word "Line" is meant to be "a single row", "a single row in a text-wrapped textbox", and not "1-pixel thick line" as in graphical meaning.  The text string provided (by setText() method) will be parsed into letters, and each letter will be turned into Imager::DTP::Letter instance internally.  Thus, Imager::DTP::Line could be understood as "a content holder for Imager::DTP::Letter instances", or "a box to put Letters in order". Each letter could hold their own font-preferences (like face/size/color), and this could be done by adding text (using setText() method) with different font-preferences one-by-one.  Then, you'll only need to call draw() method once to draw all those letters.
+
+   use Imager::DTP::Line::Horizontal;  # or Vertical
+   
+   # define font & text string
+   my $font = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
+              size=>16);
+   my $text = 'master of puppets';
+   
+   # create instance - basic way
+   my $line = Imager::DTP::Line::Horizontal->new();
+   $line->setText(text=>$text,font=>$font); # set text with font
+   $line->setWspace(pixel=>5); # set space between letters
+   $line->setLetterScale(x=>1.2,y=>0.5); # set letter transform scale
+   
+   # create instance - or the shorcut way
+   my $line = Imager::DTP::Line::Horizontal->new(text=>$text,
+              font=>$font, wspace=>5, xscale=>1.2, yscale=>0.5);
+   
+   # draw the text string on target image
+   my $target = Imager->new(xsize=>250,ysize=>50);
+   $line->draw(target=>$target,x=>10,y=>10);
 
 =head1 CLASS RELATION
 
@@ -172,6 +199,10 @@ Can be called with or without options.
    my $text = 'I am the law';
    my $line = Imager::DTP::Line::Horizontal->new(text=>$text,
               font=>$font,wspace=>5);
+   
+   # also, can setLetterScale at the same time too.
+   my $line = Imager::DTP::Line::Horizontal->new(text=>$text,
+              font=>$font, wspace=>5, xscale=>1.2, yscale=>0.5);
 
 =head3 setText
 
@@ -211,6 +242,16 @@ Wspace is a blank space between each letters.  By setting a value (in pixels), a
 
    # setting a 5 pixel word space
    $line->setWspace(pixel=>5);
+
+=head3 setLetterScale
+
+Setting x/y scale will make each letter transform to the specified ratio.  See <Imager::DTP::Letter>->setScale() method for further description.
+
+   # make width of each letter to 80%
+   $line->setLetterScale(x=>0.8);
+   
+   # make width 120% and height 60%
+   $line->setLetterScale(x=>1.2,y=>0.6);
 
 =head3 draw
 

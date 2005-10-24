@@ -7,3 +7,10 @@ Revision history for Perl extension Imager::DTP.
 	- Imager + FreeType2 pre-req check added to Makefile.PL
 	- changes in pod documentation and README
 	- changes in t/*.t script
+
+0.03 Mon Oct 24 18:11:00 2005
+	- Letter transformation (x/y scaling) methods added.
+	      * Imager::DTP::Letter->setScale()
+	      * Imager::DTP::Line->setLetterScale()
+	      * Imager::DTP::Textbox->setLetterScale()
+	- changes in pod documentation and README

@@ -2,9 +2,10 @@ package Imager::DTP::Letter;
 use strict;
 use Carp;
 use Imager;
+use Imager::Matrix2d;
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub new {
 	my $self = shift;
@@ -18,12 +19,15 @@ sub new {
 		descent        => 0,
 		ascent         => 0,
 		advanced_width => 0,
+		xscale         => 1,
+		yscale         => 1,
 		isUpdated      => 0, # check flag for _calcWidthHeight needs
 	};
 	$self = bless($p,$self);
 	# set properties
 	$self->setText(text=>$o{text}) if(defined($o{text}));
 	$self->setFont(font=>$o{font}) if(defined($o{font}));
+	$self->setScale(x=>$o{xscale},y=>$o{yscale}) if($o{xscale} || $o{yscale});
 	return $self;
 }
 
@@ -36,6 +40,12 @@ sub draw {
 	if($o{debug}){
 		$o{target}->box(filled=>0,aa=>0,color=>'#999999',xmin=>$o{x},ymin=>$o{y},
 		                xmax=>$o{x}+$self->getWidth()-1,ymax=>$o{y}+$self->getAscent()-1);
+	}
+	# scale transformation
+	my($sx,$sy) = $self->getScale();
+	if($sx != 1 || $sy != 1){
+		my $m = Imager::Matrix2d->scale(x=>$sx,y=>$sy);
+		$self->getFont()->transform(matrix=>$m);
 	}
 	# draw letter - using Imager::String method
 	$o{target}->string(%{$o{others}},x=>$o{x},y=>$o{y},text=>$self->getText(),
@@ -82,6 +92,21 @@ sub setFont {
 	return 1;
 }
 
+sub setScale {
+	my $self = shift;
+	my %o  = @_;
+	# validation
+	foreach my $v (qw(x y)){
+		if($o{$v} && $o{$v} !~ /^\d+(\.\d+)?$/){
+			confess "$v: must be a ratio value (like 0.5, 1.2, and so on)";
+		}
+	};
+	$self->{xscale} = $o{x} if($o{x});
+	$self->{yscale} = $o{y} if($o{y});
+	$self->{isUpdated} = 0;
+	return 1;
+}
+
 sub _calcWidthHeight {
 	my $self = shift;
 	return undef if($self->{isUpdated});
@@ -100,11 +125,12 @@ sub _calcWidthHeight {
 		           Perhaps you forgot to encode your text to utf8?
 		           *ATTENTION* utf8-flag must be enabled! try using \&utf8::decode() );
 	}
-	$self->{width}   = $b->total_width();
-	$self->{height}  = $b->text_height();
-	$self->{descent} = $b->descent();
-	$self->{ascent}  = $b->ascent();
-	$self->{advanced_width} = $b->advance_width();
+	my ($x,$y) = $self->getScale();
+	$self->{width}   = ($x != 1)? $b->total_width() * $x : $b->total_width();
+	$self->{height}  = ($y != 1)? $b->text_height() * $y : $b->text_height();
+	$self->{descent} = ($y != 1)? $b->descent() * $y : $b->descent();
+	$self->{ascent}  = ($y != 1)? $b->ascent() * $y : $b->ascent();
+	$self->{advanced_width} = ($x != 1)? $b->advance_width() * $x : $b->advance_width();
 	# for blank space
 	if($self->{text} eq ' '){
 		$self->{ascent} = $self->{width};
@@ -119,6 +145,10 @@ sub getText {
 }
 sub getFont {
 	return shift->{font};
+}
+sub getScale {
+	my $self = shift;
+	return ($self->{xscale},$self->{yscale});
 }
 sub getWidth {
 	my $self = shift;
@@ -168,9 +198,11 @@ Imager::DTP::Letter - letter handling module for Imager::DTP package
    my $ltr = Imager::DTP::Letter->new();
    $ltr->setText(text=>$text);    # set text
    $ltr->setFont(font=>$font);    # set font
+   $ltr->setScale(x=>1.2,y=>0.5); # set transform scale (optional)
    
    # create instance - or the shorcut way
-   my $ltr = Imager::DTP::Letter->new(text=>$text,font=>$font);
+   my $ltr = Imager::DTP::Letter->new(text=>$text,font=>$font,
+             xscale=>1.2,yscale=>0.5);
    
    # and draw letter on target image
    my $target = Imager->new(xsize=>50,ysize=>50);
@@ -196,6 +228,10 @@ Can be called with or without options.
               size=>16);
    my $text = 'A';
    my $ltr  = Imager::DTP::Letter->new(text=>$text,font=>$font);
+   
+   # also, can setScale at the same time too.
+   my $ltr  = Imager::DTP::Letter->new(text=>$text,font=>$font,
+              xscale=>1.2,yscale=>0.5);
 
 =head3 setText
 
@@ -225,6 +261,18 @@ The following Imager::Font options are forced to these values internally.  Other
 =item * vlayout => 0
 
 =back
+
+=head3 setScale
+
+By setting x and y scaling to ratios other than 1.0 (default setting), you can make letters wider/narrower, or longer/shorter (width and height transformation).
+
+   # make width of letter to 80%
+   $ltr->setScale(x=>0.8);
+   
+   # make width 120% and height 60%
+   $ltr->setScale(x=>1.2,y=>0.6);
+
+Transformation is done by using L<Imager::Font>->transform() method, with the help of L<Imager::Matrix2d> module.
 
 =head3 draw
 
@@ -267,6 +315,12 @@ Returns the letter/character string.
 
 Returns a reference (pointer) to the Imager::Font object.
 
+=head3 getScale
+
+Returns an array containing the current x/y scale setting.
+
+   my($x,$y) = $self->getScale();
+
 =head3 getWidth
 
 Returns the width (in pixels) of the instance.
@@ -290,8 +344,6 @@ Returns the advanced width (in pixels) of the instance.
 =head1 TODO
 
 =over
-
-=item * transformation (like width*80%, height*120%)
 
 =item * change Carp-only error handling to something more elegant.
 
