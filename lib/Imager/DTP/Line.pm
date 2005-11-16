@@ -5,7 +5,7 @@ use utf8;
 use Imager::DTP::Letter;
 use vars qw($VERSION);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 sub new {
 	my $self = shift;
@@ -130,41 +130,34 @@ Imager::DTP::Line - line handling module for Imager::DTP package.
    
    # first, define font & text string
    my $font = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
-              size=>16);
+              size=>16,color=>'#000000',aa=>1);
    my $text = 'master of puppets';
    
    # create instance
    my $line = Imager::DTP::Line::Horizontal->new(text=>$text,
               font=>$font);
    
-   # and draw the text string on target image
+   # draw the text string on target image
    my $target = Imager->new(xsize=>250,ysize=>50);
+   $target->box(filled=>1,color=>'#FFFFFF'); # with white background
    $line->draw(target=>$target,x=>10,y=>10);
+   
+   # and write out image to file
+   $target->write(file=>'result.jpg',type=>'jpeg');
 
 =head1 DESCRIPTION
 
 Imager::DTP::Line is a module intended for handling chunk of letters lined-up in a single vector, out of the whole text string (sentence or paragraph).  Here, the word "Line" is meant to be "a single row", "a single row in a text-wrapped textbox", and not "1-pixel thick line" as in graphical meaning.  The text string provided (by setText() method) will be parsed into letters, and each letter will be turned into Imager::DTP::Letter instance internally.  Thus, Imager::DTP::Line could be understood as "a content holder for Imager::DTP::Letter instances", or "a box to put Letters in order". Each letter could hold their own font-preferences (like face/size/color), and this could be done by adding text (using setText() method) with different font-preferences one-by-one.  Then, you'll only need to call draw() method once to draw all those letters.
 
-   use Imager::DTP::Line::Horizontal;  # or Vertical
-   
-   # define font & text string
-   my $font = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
-              size=>16);
-   my $text = 'master of puppets';
-   
-   # create instance - basic way
+   # creating instance - basic way
    my $line = Imager::DTP::Line::Horizontal->new();
    $line->setText(text=>$text,font=>$font); # set text with font
    $line->setWspace(pixel=>5); # set space between letters
    $line->setLetterScale(x=>1.2,y=>0.5); # set letter transform scale
    
-   # create instance - or the shorcut way
+   # creating instance - or the shorcut way
    my $line = Imager::DTP::Line::Horizontal->new(text=>$text,
               font=>$font, wspace=>5, xscale=>1.2, yscale=>0.5);
-   
-   # draw the text string on target image
-   my $target = Imager->new(xsize=>250,ysize=>50);
-   $line->draw(target=>$target,x=>10,y=>10);
 
 =head1 CLASS RELATION
 

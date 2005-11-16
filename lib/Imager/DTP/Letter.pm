@@ -5,7 +5,7 @@ use Imager;
 use Imager::Matrix2d;
 use vars qw($VERSION);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 sub new {
 	my $self = shift;
@@ -191,7 +191,7 @@ Imager::DTP::Letter - letter handling module for Imager::DTP package
    
    # first, define font & letter string
    my $font = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
-              size=>16);
+              size=>16,color=>'#000000',aa=>1);
    my $text = 'A';
    
    # create instance - basic way
@@ -204,9 +204,13 @@ Imager::DTP::Letter - letter handling module for Imager::DTP package
    my $ltr = Imager::DTP::Letter->new(text=>$text,font=>$font,
              xscale=>1.2,yscale=>0.5);
    
-   # and draw letter on target image
+   # draw letter on target image
    my $target = Imager->new(xsize=>50,ysize=>50);
+   $target->box(filled=>1,color=>'#FFFFFF'); # with white background
    $ltr->draw(target=>$target,x=>10,y=>10);
+   
+   # and write out image to file
+   $target->write(file=>'result.jpg',type=>'jpeg');
 
 =head1 DESCRIPTION
 

@@ -14,3 +14,8 @@ Revision history for Perl extension Imager::DTP.
 	      * Imager::DTP::Line->setLetterScale()
 	      * Imager::DTP::Textbox->setLetterScale()
 	- changes in pod documentation and README
+
+0.04 Wed Nov 16 23:49:00 2005
+	- fix bug on setText method, where add=>1 to empty textbox didn't work.
+	- fix bug on setText method, where pre&post \n characters disappeared.
+	- changes in pod documentation and README

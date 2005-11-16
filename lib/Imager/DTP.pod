@@ -1,5 +1,5 @@
 # distribution version
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 =pod
 
@@ -13,31 +13,25 @@ Imager::DTP - draw text with DTP app-like custom options
    
    # first, define font & text string
    my $font  = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
-               size=>12);
-   my $text  = "Brother will kill brother, ";
+               size=>16,color=>'#000000',aa=>1);
+   my $text  = "Brother will kill brother, \n";
       $text .= "spilling blood across the land.\n";
-      $text .= "Killing for religion, "; 
+      $text .= "Killing for religion, \n"; 
       $text .= "something I don't understand.";
    # with multi-byte characters, encode it to UTF8, with internal
    # utf-8 flag enabled (using utf8::decode()).
    
    # create textbox instance
    my $tb = Imager::DTP::Textbox::Horizontal->new(
-               text=>$text,     # set text
-               font=>$font,     # set font
-               wspace=>5,       # set word distance (pixels)
-               leading=>150,    # set line distance (percent)
-               halign=>'left',  # set horizontal alignment
-               valign=>'top',   # set vertical alignment
-               wrapWidth=>200,  # set text wrap width
-               wrapHeight=>180, # set text wrap height
-               xscale=>1.5,     # set letter transformation x scale
-               yscale=>0.5,     # set letter transformation y scale
-            );
+            text=>$text,font=>$font);
    
    # draw the text string on target image
    my $target = Imager->new(xsize=>250,ysize=>250);
+   $target->box(filled=>1,color=>'#FFFFFF'); # with white background
    $tb->draw(target=>$target,x=>10,y=>10);
+   
+   # and write out image to file
+   $target->write(file=>'result.jpg',type=>'jpeg');
 
 =head1 DESCRIPTION.
 

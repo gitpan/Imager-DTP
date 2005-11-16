@@ -4,7 +4,7 @@ use Carp;
 use Imager;
 use vars qw($VERSION);
 
-$VERSION = '0.03';
+$VERSION = '0.04';
 
 sub new {
 	my $self = shift;
@@ -284,11 +284,22 @@ sub setText {
 	# clear current lines
 	$self->{lines} = [] if(!$o{add});
 	# parse by line feeds
-	my @lineTexts = split(/\n/,$o{text});
-	@lineTexts = (' ') if(scalar @lineTexts == 0); # to create a blank line
+	my(@lineTexts,$t,$len);
+	($t) = ($o{text} =~ /^(\n+)/); # look for pre-\n's
+	$len = ($t)? length($t) : 0;
+	if($len > 0){
+		push(@lineTexts,'') for (1 .. $len);
+	}
+	($t) = ($o{text} =~ /(\n+)$/); # look for post-\n's
+	$len = ($t)? length($t) : 0;
+	@lineTexts = split(/\n/,$o{text}); # split inner text by line feeds
+	if($len > 0){
+		push(@lineTexts,'') for (1 .. $len);
+	}
+	@lineTexts = ('') if(scalar @lineTexts == 0); # to create a blank line
 	my $i=0;
 	foreach my $text (@lineTexts){
-		if($i == 0 && $o{add}){
+		if($i == 0 && $lastLine && $o{add}){
 			# add new texts to the end of last line
 			$lastLine->setText(text=>$text,font=>$o{font},add=>1);
 			push(@{$self->{lines}},$lastLine);
@@ -419,35 +430,26 @@ Imager::DTP::Textbox - multi-byte text handling module with text wrapping and li
    
    # first, define font & text string
    my $font  = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
-               size=>14);
+               size=>14,color=>'#000000',aa=>1);
    my $text  = 'The Greater Of Two Evils';
    
    # create instance
-   my $tb = Imager::DTP::Textbox::Horizontal->new(text=>$text,
-            font=>$font);
+   my $tb = Imager::DTP::Textbox::Horizontal->new(
+            text=>$text,font=>$font);
    
-   # and draw the text string on target image
+   # draw the text string on target image
    my $target = Imager->new(xsize=>250,ysize=>250);
+   $target->box(filled=>1,color=>'#FFFFFF'); # with white background
    $tb->draw(target=>$target,x=>10,y=>10);
+   
+   # and write out image to file
+   $target->write(file=>'result.jpg',type=>'jpeg');
 
 =head1 DESCRIPTION
 
 Imager::DTP::Textbox is a module intended for handling sentences and paragraphs consisted with multi-byte characters, such as Japanese and Chinese.  It supports text wrapping and line alignment, and is able to draw text string vertically from top to bottom as well.  All the text string provided (by setText() method) will be splitted by "\n", and each chunk will be turned into Imager::DTP::Line instance internally.  So in another words, Imager::DTP::Textbox can be described as "a big box to put lines and letters in order". It's like WWW Browser's textarea input, or Adobe Illustrator's textbox tool.
 
-   use Imager::DTP::Textbox::Horizontal;  # or Vertical
-   
-   # define font & text string
-   my $font  = Imager::Font->new(file=>'path/to/foo.ttf',type=>'ft2',
-               size=>14);
-   my $text  = 'This year\'s Thrash Domination Tour here in ';
-      $text .= 'Japan was great.';
-      $text .= "\n\n";
-      $text .= 'With Testament, Kreator, Destruction, and '; 
-      $text .= 'Laaz Rockit all gathered at one place.';
-   # with multi-byte characters, encode it to UTF8, with internal
-   # utf-8 flag enabled (using utf8::decode()).
-   
-   # create instance - basic way
+   # creating instance - basic way
    my $tb = Imager::DTP::Textbox::Horizontal->new();
    $tb->setText(text=>$text,font=>$font); # set text with font
    $tb->setWspace(pixel=>5); # set space between letters
@@ -456,15 +458,19 @@ Imager::DTP::Textbox is a module intended for handling sentences and paragraphs 
    $tb->setWrap(width=>200,height=>150); # set text wrapping
    $tb->setLetterScale(x=>1.2,y=>0.5); # set letter transform scale
    
-   # create instance - or the shorcut way
-   my $tb = Imager::DTP::Textbox::Horizontal->new(text=>$text,
-            font=>$font, wspace=>5, leading=>180, halign=>'left',
-            valign=>'top', wrapWidth=>200, wrapHeight=>180, 
-            xscale=>1.2, yscale=>0.5);
-   
-   # draw the text string on target image
-   my $target = Imager->new(xsize=>250,ysize=>250);
-   $tb->draw(target=>$target,x=>10,y=>10);
+   # creating instance - or the shorcut way
+   my $tb = Imager::DTP::Textbox::Horizontal->new(
+               text=>$text,     # set text
+               font=>$font,     # set font
+               wspace=>5,       # set word distance (pixels)
+               leading=>150,    # set line distance (percent)
+               halign=>'left',  # set horizontal alignment
+               valign=>'top',   # set vertical alignment
+               wrapWidth=>200,  # set text wrap width
+               wrapHeight=>180, # set text wrap height
+               xscale=>1.5,     # set letter transformation x scale
+               yscale=>0.5,     # set letter transformation y scale
+            );
 
 =head1 CLASS RELATION
 
