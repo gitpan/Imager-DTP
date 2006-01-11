@@ -4,7 +4,7 @@ use Imager::DTP::Line::Vertical;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub _draw_drawLines {
 	my $self = shift;
@@ -18,7 +18,7 @@ sub _draw_drawLines {
 		my $width  = ($self->getWrapWidth())?  $self->getWrapWidth()  : $self->_getWidth();
 		my $height = ($self->getWrapHeight())? $self->getWrapHeight() : $self->_getHeight();
 		$o{target}->box(filled=>1,color=>'#BBBBBB',xmin=>$dbgx-$width,ymin=>$y,
-	                    xmax=>$dbgx-1,ymax=>$y+$height-1);
+	                    xmax=>$dbgx,ymax=>$y+$height);
 	}
 	my $lineWidth = $self->_getMaxLetterSize();
 	my $lineSpace = $self->_calcLineSpace();
@@ -100,7 +100,7 @@ sub _calcWrap_LetterStack_getLineMax {
 sub _calcWrap_LetterStack_getLetterSize {
 	my $self = shift;
 	my %o = @_;
-	return $o{letter}->getHeight();
+	return $o{letter}->getGlobalAscent() - $o{letter}->getGlobalDescent();
 }
 
 sub _calcWrap_LineStack_getWrapMax {
@@ -143,7 +143,7 @@ See L<Imager::DTP::Textbox> for synopsis and description.
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
+Toshimasa Ishibashi, <iandeth99@ybb.ne.jp>
 
 =head1 COPYRIGHT & LICENSE
 

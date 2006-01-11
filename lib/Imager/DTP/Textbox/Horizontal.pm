@@ -4,7 +4,7 @@ use Imager::DTP::Line::Horizontal;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub _draw_drawLines {
 	my $self = shift;
@@ -18,7 +18,7 @@ sub _draw_drawLines {
 		my $width  = ($self->getWrapWidth())?  $self->getWrapWidth()  : $self->_getWidth();
 		my $height = ($self->getWrapHeight())? $self->getWrapHeight() : $self->_getHeight();
 		$o{target}->box(filled=>1,color=>'#BBBBBB',xmin=>$x,ymin=>$dbgy,
-	                    xmax=>$x+$width-1,ymax=>$dbgy+$height-1);
+	                    xmax=>$x+$width,ymax=>$dbgy+$height);
 	}
 	my $lineHeight = $self->_getMaxLetterSize();
 	my $lineSpace  = $self->_calcLineSpace();
@@ -146,7 +146,7 @@ See L<Imager::DTP::Textbox> for synopsis and description.
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
+Toshimasa Ishibashi, <iandeth99@ybb.ne.jp>
 
 =head1 COPYRIGHT & LICENSE
 

@@ -3,7 +3,7 @@ use base Imager::DTP::Line;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub draw {
 	my $self = shift;
@@ -16,12 +16,12 @@ sub draw {
 	# draw box - debug
 	if($o{debug}){
 		$o{target}->box(filled=>1,color=>'#EFEFEF',xmin=>$x,ymin=>$y,
-		                xmax=>$x+$self->getWidth()-1,ymax=>$y+$l-1);
+		                xmax=>$x+$self->getWidth(),ymax=>$y+$l);
 	}
 	foreach my $ltr (@{$self->getLetters()}){
-		my $nowy = $y + $l - $ltr->getAscent();
-		my $nowx = $x + sprintf("%.0f",($ltr->getAdvancedWidth() - $ltr->getWidth()) /2);
-		$ltr->draw(target=>$o{target},x=>$nowx,y=>$nowy,debug=>$o{debug},
+		my $nowy = $y + $l - $ltr->getGlobalAscent();
+
+		$ltr->draw(target=>$o{target},x=>$x,y=>$nowy,debug=>$o{debug},
 		           others=>$o{others}) or die $ltr->errstr;
 		$x += $ltr->getAdvancedWidth() + $self->getWspace();
 	}
@@ -38,9 +38,9 @@ sub _calcWidthHeight {
 	foreach my $ltr (@{$self->getLetters()}){
 		$ltr->_calcWidthHeight();
 		$w += $ltr->getAdvancedWidth() + $wspace;
-		$a  = ($ltr->getAscent() > $a)? $ltr->getAscent() : $a;
+		$a  = ($ltr->getGlobalAscent() > $a)? $ltr->getGlobalAscent() : $a;
 		# remember, descent is a negative integer
-		$d  = ($ltr->getDescent() < $d)? $ltr->getDescent() : $d;
+		$d  = ($ltr->getGlobalDescent() < $d)? $ltr->getGlobalDescent() : $d;
 	}
 	$w -= $wspace; # don't need the last wspace
 	$self->{height}  = $a+(-$d);
@@ -77,7 +77,7 @@ See L<Imager::DTP::Line> for synopsis and description.
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
+Toshimasa Ishibashi, <iandeth99@ybb.ne.jp>
 
 =head1 COPYRIGHT & LICENSE
 

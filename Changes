@@ -19,3 +19,14 @@ Revision history for Perl extension Imager::DTP.
 	- fix bug on setText method, where add=>1 to empty textbox didn't work.
 	- fix bug on setText method, where pre&post \n characters disappeared.
 	- changes in pod documentation and README
+
+0.05 Wed Jan 11 21:41:00 2006
+	- major update on Imager::DTP::Letter
+	      * more precise bounding box calculation.
+	      * friendlier debug view.
+	      * added getter methods - getLeftBearing, getRightBearing, getGlobalAscent, getGlobalDescent, getEndOffset.
+	- update on Imager::DTP::Line
+	      * better alignment calculation - the output looks much better now.
+	- update on Imager::DTP::Textbox
+	      * better alignment calculation - the output looks much better now.
+	      * leading will get a bit wider due to the change.

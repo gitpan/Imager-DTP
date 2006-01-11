@@ -5,7 +5,7 @@ use Imager;
 use Imager::Matrix2d;
 use vars qw($VERSION);
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 sub new {
 	my $self = shift;
@@ -19,6 +19,11 @@ sub new {
 		descent        => 0,
 		ascent         => 0,
 		advanced_width => 0,
+		left_bearing   => 0,
+		right_bearing  => 0,
+		global_ascent  => 0,
+		global_descent => 0,
+		end_offset     => 0,
 		xscale         => 1,
 		yscale         => 1,
 		isUpdated      => 0, # check flag for _calcWidthHeight needs
@@ -36,10 +41,24 @@ sub draw {
 	my %o = $self->_draw_init(@_);
 	# recalculate bounding box
 	$self->_calcWidthHeight();
-	# draw box - for debug mode
+	# draw frame - for debug
 	if($o{debug}){
-		$o{target}->box(filled=>0,aa=>0,color=>'#999999',xmin=>$o{x},ymin=>$o{y},
-		                xmax=>$o{x}+$self->getWidth()-1,ymax=>$o{y}+$self->getAscent()-1);
+		# real body frame
+		$o{target}->box(
+			filled=>1,aa=>0,color=>'#FFAA99',
+			xmin=>$o{x} + $self->getLeftBearing(),
+			ymin=>$o{y} + $self->getGlobalAscent() - $self->getAscent(),
+			xmax=>$o{x} + $self->getEndOffset(),
+			ymax=>$o{y} + $self->getGlobalAscent() - $self->getDescent(),
+		) if($o{debug} > 1);
+		# virtual (outer) body frame
+		$o{target}->box(
+			filled=>0,aa=>0,color=>'#999999',
+			xmin=>$o{x},
+			ymin=>$o{y},
+			xmax=>$o{x} + $self->getAdvancedWidth(),
+			ymax=>$o{y} + $self->getGlobalAscent() - $self->getGlobalDescent(),
+		);
 	}
 	# scale transformation
 	my($sx,$sy) = $self->getScale();
@@ -48,8 +67,24 @@ sub draw {
 		$self->getFont()->transform(matrix=>$m);
 	}
 	# draw letter - using Imager::String method
-	$o{target}->string(%{$o{others}},x=>$o{x},y=>$o{y},text=>$self->getText(),
-	                   font=>$self->getFont(),utf8=>1,vlayout=>0,align=>0) or die $o{target}->errstr;
+	$o{target}->string(
+		%{$o{others}},
+		x => $o{x} + $self->getLeftBearing(),
+		y => $o{y} + $self->getGlobalAscent() - $self->getAscent(),
+		text => $self->getText(),
+		font => $self->getFont(),
+		utf8 => 1, vlayout => 0, align => 0
+	) or die $o{target}->errstr;
+	# draw baseline position - for debug
+	if($o{debug}){
+		$o{target}->box(
+			filled=>1,aa=>0,color=>'#880000',
+			xmin=>$o{x},
+			xmax=>$o{x}+$self->getAdvancedWidth(),
+			ymin=>$o{y}+$self->getGlobalAscent(),
+			ymax=>$o{y}+$self->getGlobalAscent()
+		);
+	}
 	return 1;
 }
 
@@ -126,11 +161,26 @@ sub _calcWidthHeight {
 		           *ATTENTION* utf8-flag must be enabled! try using \&utf8::decode() );
 	}
 	my ($x,$y) = $self->getScale();
-	$self->{width}   = ($x != 1)? $b->total_width() * $x : $b->total_width();
-	$self->{height}  = ($y != 1)? $b->text_height() * $y : $b->text_height();
-	$self->{descent} = ($y != 1)? $b->descent() * $y : $b->descent();
-	$self->{ascent}  = ($y != 1)? $b->ascent() * $y : $b->ascent();
-	$self->{advanced_width} = ($x != 1)? $b->advance_width() * $x : $b->advance_width();
+	$self->{width}          = $b->total_width();
+	$self->{height}         = $b->text_height();
+	$self->{descent}        = $b->descent();
+	$self->{ascent}         = $b->ascent();
+	$self->{advanced_width} = $b->advance_width();
+	$self->{left_bearing}   = $b->left_bearing;
+	$self->{right_bearing}  = $b->advance_width() - $b->end_offset();
+	$self->{global_ascent}  = $b->global_ascent();
+	$self->{global_descent} = $b->global_descent();
+	$self->{end_offset}     = $b->end_offset();
+	if($x != 1){
+		foreach my $v qw(width advanced_width left_bearing right_bearing end_offset){
+			$self->{$v} *= $x;
+		}
+	}
+	if($y != 1){
+		foreach my $v qw(height descent ascent global_ascent global_descent){
+			$self->{$v} *= $y;
+		}
+	}
 	# for blank space
 	if($self->{text} eq ' '){
 		$self->{ascent} = $self->{width};
@@ -174,6 +224,31 @@ sub getAdvancedWidth {
 	my $self = shift;
 	$self->_calcWidthHeight();
 	return $self->{advanced_width};
+}
+sub getLeftBearing {
+	my $self = shift;
+	$self->_calcWidthHeight();
+	return $self->{left_bearing};
+}
+sub getRightBearing {
+	my $self = shift;
+	$self->_calcWidthHeight();
+	return $self->{right_bearing};
+}
+sub getGlobalAscent {
+	my $self = shift;
+	$self->_calcWidthHeight();
+	return $self->{global_ascent};
+}
+sub getGlobalDescent {
+	my $self = shift;
+	$self->_calcWidthHeight();
+	return $self->{global_descent};
+}
+sub getEndOffset {
+	my $self = shift;
+	$self->_calcWidthHeight();
+	return $self->{end_offset};
 }
 
 1;
@@ -327,23 +402,26 @@ Returns an array containing the current x/y scale setting.
 
 =head3 getWidth
 
-Returns the width (in pixels) of the instance.
-
 =head3 getHeight
-
-Returns the height (in pixels) of the instance.
 
 =head3 getAscent
 
-Returns the ascent (in pixels) of the instance.
-
 =head3 getDescent
-
-Returns the descent (in pixels) of the instance.
 
 =head3 getAdvancedWidth
 
-Returns the advanced width (in pixels) of the instance.
+=head3 getLeftBearing
+
+=head3 getRightBearing
+
+=head3 getGlobalAscent
+
+=head3 getGlobalDescent
+
+=head3 getEndOffset
+
+These returns the designated property value (in pixels) of current letter, when drawn with the current font setting.  See L<Imager::Font::BBox>'s documentation for description on each properties.
+
 
 =head1 TODO
 
@@ -355,7 +433,7 @@ Returns the advanced width (in pixels) of the instance.
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
+Toshimasa Ishibashi, <iandeth99@ybb.ne.jp>
 
 =head1 COPYRIGHT & LICENSE
 

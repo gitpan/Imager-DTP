@@ -206,7 +206,7 @@ Set text string to the instance.  Text is optional (without text, it'll act as a
    my $text = 'peace sells';
    $line->setText(text=>$text,font=>$font);
 
-By default, each time the method is called, it replaces the previous text with the provided new text.  But by putting the "add" option, it will add new text to the end of the current text.
+By default, when each time the method is called, it replaces the previous text with the provided new text.  But by putting the "add" option, it will add new text to the end of the current text.
 
    # as from above sample, this will make
    # the internal text to "peace sells but whos buying?"
@@ -309,7 +309,7 @@ I can't figure out a way to call vertical-fonts inplemented inside multi-byte fo
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
+Toshimasa Ishibashi, <iandeth99@ybb.ne.jp>
 
 =head1 COPYRIGHT & LICENSE
 

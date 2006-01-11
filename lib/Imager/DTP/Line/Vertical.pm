@@ -3,7 +3,7 @@ use base Imager::DTP::Line;
 use strict;
 use vars qw($VERSION);
 
-$VERSION = '0.02';
+$VERSION = '0.03';
 
 sub draw {
 	my $self = shift;
@@ -15,14 +15,14 @@ sub draw {
 	my $lineWidth = ($o{leading})? $o{leading} : $self->getWidth();
 	# draw box - debug
 	if($o{debug}){
-		$o{target}->box(filled=>1,color=>'#EFEFEF',xmin=>$x,ymin=>$y,xmax=>$x+$lineWidth-1,
-		                ymax=>$y+$self->getHeight()-1);
+		$o{target}->box(filled=>1,color=>'#EFEFEF',xmin=>$x,ymin=>$y,xmax=>$x+$lineWidth,
+		                ymax=>$y+$self->getHeight());
 	}
 	foreach my $ltr (@{$self->getLetters()}){
-		my $nowx =  sprintf("%.0f",($lineWidth - $ltr->getWidth()) / 2) + $x;
+		my $nowx =  sprintf("%.0f",($lineWidth - $ltr->getAdvancedWidth()) / 2) + $x;
 		$ltr->draw(target=>$o{target},x=>$nowx,y=>$y,debug=>$o{debug},
 		           others=>$o{others});
-		$y += $ltr->getHeight() + $self->getWspace();
+		$y += $ltr->getGlobalAscent() - $ltr->getGlobalDescent + $self->getWspace();
 	}
 	return 1;
 }
@@ -37,10 +37,10 @@ sub _calcWidthHeight {
 	foreach my $ltr (@{$self->getLetters()}){
 		$ltr->_calcWidthHeight();
 		$w  = ($ltr->getWidth() > $w)? $ltr->getWidth() : $w;
-		$h += $ltr->getHeight() + $wspace;
-		$a  = ($ltr->getAscent() > $a)? $ltr->getAscent() : $a;
+		$h += $ltr->getGlobalAscent() - $ltr->getGlobalDescent + $wspace;
+		$a  = ($ltr->getGlobalAscent() > $a)? $ltr->getGlobalAscent() : $a;
 		# remember, descent is a negative integer
-		$d  = ($ltr->getDescent() < $d)? $ltr->getDescent() : $d;
+		$d  = ($ltr->getGlobalDescent() < $d)? $ltr->getGlobalDescent() : $d;
 	}
 	$h -= $wspace; # don't need the last wspace
 	$self->{height}  = $h;
@@ -113,7 +113,7 @@ With most of commercial publication (in my country - Japan), two digit numerals 
 
 =head1 AUTHOR
 
-Toshimasa Ishibashi, C<< <iandeth99@ybb.ne.jp> >>
+Toshimasa Ishibashi, <iandeth99@ybb.ne.jp>
 
 =head1 COPYRIGHT & LICENSE
 
