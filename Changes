@@ -30,3 +30,7 @@ Revision history for Perl extension Imager::DTP.
 	- update on Imager::DTP::Textbox
 	      * better alignment calculation - the output looks much better now.
 	      * leading will get a bit wider due to the change.
+
+0.06 Fri Jan 19 15:00:00 2007
+	- negative integers now available for space between letters.
+	      * Imager::DTP::Line->setWspace( pixel=>-5 )

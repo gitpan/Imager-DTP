@@ -5,7 +5,7 @@ use utf8;
 use Imager::DTP::Letter;
 use vars qw($VERSION);
 
-$VERSION = '0.04';
+$VERSION = '0.05';
 
 sub new {
 	my $self = shift;
@@ -67,10 +67,10 @@ sub _setText_parse {
 sub setWspace {
 	my $self = shift;
 	my %o = @_;
-	if(defined($o{pixel}) && $o{pixel} !~ /^\d+$/){
+	if(defined($o{pixel}) && $o{pixel} !~ /^(-)?\d+$/){
 		confess "pixel: must be an integer ($o{pixel})";
 	}
-	$self->{wspace} = ($o{pixel})? $o{pixel} : 0;
+	$self->{wspace} = (defined $o{pixel})? $o{pixel} : 0;
 	$self->{isUpdated} = 0;
 	return 1;
 }
